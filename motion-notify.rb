@@ -100,4 +100,7 @@ if sub_coll.nil?
 end
 
 # upload picture
-sub_coll.upload_from_file(picture_path, datetime.strftime("%H:%M:%S"))
+begin
+  sub_coll.upload_from_file(picture_path, datetime.strftime("%H:%M:%S"))
+  File.unlink(picture_path)
+end
