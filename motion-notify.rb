@@ -1,6 +1,5 @@
 require 'getoptlong'
 require 'date'
-require 'bundler/setup'
 require 'google_drive'
 
 def print_usage(program_name)
@@ -19,23 +18,28 @@ def print_usage(program_name)
 -d datetime, --datetime datetime:
    Date and time of event (YYYY-mm-dd HH:MM:SS)
 
+-F frame, --frame frame:
+   Frame number
+
 -p picture-path, --picture picture-path:
    Full path of picture
 EOF
 end
 
 opts = GetoptLong.new(
-  [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
-  [ '--folder-id', '-f', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--config', '-c', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--datetime', '-d', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--picture', '-p', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--help',       '-h',  GetoptLong::NO_ARGUMENT ],
+  [ '--folder-id',  '-f',  GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--config',     '-c',  GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--datetime',   '-d',  GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--frame',      '-F',  GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--picture',    '-p',  GetoptLong::REQUIRED_ARGUMENT ],
 )
 
 program_name = $0
 folder_id = nil
 config_path = nil
 datetime = nil
+frame = nil
 picture_path = nil
 
 opts.each do |opt, arg|
@@ -49,6 +53,8 @@ opts.each do |opt, arg|
     config_path = arg
   when '--datetime'
     datetime = arg
+  when '--frame'
+    frame = arg
   when '--picture'
     picture_path = arg
   end
@@ -73,6 +79,10 @@ else
     puts "#{datetime} is not a valid datetime"
     valid = false
   end
+end
+if frame.nil?
+  puts "--frame is required"
+  valid = false
 end
 if picture_path.nil?
   puts "--picture is required"
@@ -101,6 +111,6 @@ end
 
 # upload picture
 begin
-  sub_coll.upload_from_file(picture_path, datetime.strftime("%H:%M:%S"))
+  sub_coll.upload_from_file(picture_path, "#{datetime.strftime("%H:%M:%S")}-#{frame}")
   File.unlink(picture_path)
 end
